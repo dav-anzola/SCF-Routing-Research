@@ -2,7 +2,5 @@
 /*
 !.gitignore
 
-!nested-subdir/
-!subdir/
-!scratch-simulator.cc
-!CMakeLists.txt
+!.test1.cc
+
