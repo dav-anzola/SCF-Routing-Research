@@ -1,0 +1,13 @@
+user.name=David Anzola
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
+remote.origin.url=https://gitlab.com/cttc-lena/ns-3-dev.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+branch.master.remote=origin
+branch.master.merge=refs/heads/master
+branch.master.vscode-merge-base=origin/master
+branch.v2x-lte-dev.remote=origin
+branch.v2x-lte-dev.merge=refs/heads/v2x-lte-dev
+branch.v2x-lte-dev.vscode-merge-base=origin/v2x-lte-dev
