@@ -39,6 +39,8 @@ class RoutingHeader : public Header
 
     void SetClusterId(uint16_t id);
 
+    void SetSenderAddress(InetSocketAddress ad);
+
     void SetForwardingAddress(InetSocketAddress ad);
 
     void SetDestinationAddress(InetSocketAddress ad);
@@ -48,7 +50,7 @@ class RoutingHeader : public Header
     uint16_t GetClusterId() const;
     InetSocketAddress GetForwardingAddress()const;
     InetSocketAddress GetDestinationAddress() const;
- 
+    InetSocketAddress GetSenderAddress() const;
     
     static TypeId GetTypeId();
     TypeId GetInstanceTypeId() const override;
@@ -63,6 +65,7 @@ class RoutingHeader : public Header
     uint16_t cluster_id;
     InetSocketAddress forwarding_address = InetSocketAddress(Ipv4Address("0.0.0.0"), 0);
     InetSocketAddress destination_address = InetSocketAddress(Ipv4Address("0.0.0.0"), 0);
+    InetSocketAddress sender_address = InetSocketAddress(Ipv4Address("0.0.0.0"), 0);
    // vector current_position
 };
  
@@ -103,7 +106,7 @@ uint32_t
 RoutingHeader::GetSerializedSize() const
 {
     
-    return 18;
+    return 24;
 }
  
 void
@@ -118,6 +121,9 @@ RoutingHeader::Serialize(Buffer::Iterator start) const
 
     start.WriteHtonU32(destination_address.GetIpv4().Get());
     start.WriteHtonU16(destination_address.GetPort());
+
+    start.WriteHtonU32(sender_address.GetIpv4().Get());
+    start.WriteHtonU16(sender_address.GetPort());
 }
  
 uint32_t
@@ -138,7 +144,11 @@ RoutingHeader::Deserialize(Buffer::Iterator start)
     uint16_t destPort = start.ReadNtohU16();
     destination_address = InetSocketAddress(destAddr, destPort);
 
-    return 18;
+    Ipv4Address senderAddr(start.ReadNtohU32());
+    uint16_t senderPort = start.ReadNtohU16();
+    sender_address = InetSocketAddress(senderAddr, senderPort);
+
+    return 24;
 }
  
 void
@@ -168,7 +178,9 @@ RoutingHeader::SetData(uint16_t data)
     destination_address=ad;
 
  }
-
+void RoutingHeader::SetSenderAddress(InetSocketAddress ad){
+    sender_address=ad;
+}
 
 uint16_t
 RoutingHeader::GetData() const
@@ -194,6 +206,11 @@ RoutingHeader::GetData() const
  InetSocketAddress
  RoutingHeader::GetDestinationAddress() const{
     return destination_address;
+ }
+
+ InetSocketAddress
+ RoutingHeader::GetSenderAddress() const{
+    return sender_address;
  }
 
  #endif
