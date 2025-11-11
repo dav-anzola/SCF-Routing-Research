@@ -222,7 +222,7 @@ main(int argc, char* argv[])
      * command line. Each of them is initialized with a default value.
      */
     // Scenario parameters (that we will use inside this script):
-    uint16_t interUeDistance = 50; // meters
+    uint16_t interUeDistance = 100; // meters
     bool logging = false;
 
     // Traffic parameters (that we will use inside this script:)
@@ -339,6 +339,18 @@ main(int argc, char* argv[])
     uint16_t groupSpread=10;
     ueVoiceContainer.Create(ueNum);
 
+    NodeContainer ueGroup1;
+    ueGroup1.Add(ueVoiceContainer.Get(0));
+    ueGroup1.Add(ueVoiceContainer.Get(1));
+    ueGroup1.Add(ueVoiceContainer.Get(2));
+    ueGroup1.Add(ueVoiceContainer.Get(3));
+
+    NodeContainer ueGroup2;
+    ueGroup2.Add(ueVoiceContainer.Get(3));
+    ueGroup2.Add(ueVoiceContainer.Get(4));
+    ueGroup2.Add(ueVoiceContainer.Get(5));
+    ueGroup2.Add(ueVoiceContainer.Get(6));
+
     /*
      * Assign mobility to the UEs.
      *  1. Set mobility model type.
@@ -346,50 +358,50 @@ main(int argc, char* argv[])
      *  3. Install mobility model
      */
 
-    MobilityHelper mobility;
-    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator>();
-    for (uint16_t i = 0; i < group1size; i++)    //Allocating for group 1 
-    {
-       if(i==0){
-        positionAllocUe->Add(Vector(interUeDistance, 0.0, 1.5));
-       }
-       else if(i%2==0){
-       positionAllocUe->Add(Vector(interUeDistance-0.5*groupSpread, i * groupSpread, 1.5));
-       }
-       else {
-        positionAllocUe->Add(Vector(interUeDistance-0.5*groupSpread, -i * groupSpread, 1.5));
-       }
+        MobilityHelper mobility;
+        mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+        Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator>();
+        for (uint16_t i = 0; i < group1size; i++)    //Allocating for group 1 
+        {
+        if(i==0){
+            positionAllocUe->Add(Vector(interUeDistance, 0.0, 1.5));
+        }
+        else if(i%2==0){
+        positionAllocUe->Add(Vector(interUeDistance-0.5*groupSpread, i * groupSpread, 1.5));
+        }
+        else {
+            positionAllocUe->Add(Vector(interUeDistance-0.5*groupSpread, -i * groupSpread, 1.5));
+        }
 
-    }
-    positionAllocUe->Add(Vector(2*interUeDistance,0.0,1.5));//Creates bridge node position interUeDistance between groups
+        }
+        positionAllocUe->Add(Vector(2*interUeDistance,0.0,1.5));//Creates bridge node position interUeDistance between groups
 
-    for (uint16_t i = 0; i < group2size; i++)    //Allocating for group 2
-    {
-       if(i==0){
-        positionAllocUe->Add(Vector(3*interUeDistance, 0.0, 1.5));
-       }
-       else if(i%2==0){
-       positionAllocUe->Add(Vector(3*interUeDistance+0.5*groupSpread, i * groupSpread, 1.5));
-       }
-       else {
-        positionAllocUe->Add(Vector(3*interUeDistance-0.5*groupSpread, -i * groupSpread, 1.5));
-       }
-    }
-    mobility.SetPositionAllocator(positionAllocUe);
-    mobility.Install(ueVoiceContainer);
-    std::cout<<sqrt(mobility.GetDistanceSquaredBetween(ueVoiceContainer.Get(0),ueVoiceContainer.Get(5)))<<std::endl;
-    std::cout<<sqrt(mobility.GetDistanceSquaredBetween(ueVoiceContainer.Get(0),ueVoiceContainer.Get(3)))<<std::endl;
-    /* The default topology is the following:
- *          
- *  UE_group1        UE_bridge        UE_group2
- *      o                                 o
- *        o             o                o
- *      o                                 o
- *            
- *  (interUeDistance-0.5*groupSpread,  (2*interUeDistance,  (3*interUeDistance±0.5*groupSpread,
- *   ±i*groupSpread, 1.5)               0.0, 1.5)            ±i*groupSpread, 1.5)
- */
+        for (uint16_t i = 0; i < group2size; i++)    //Allocating for group 2
+        {
+        if(i==0){
+            positionAllocUe->Add(Vector(3*interUeDistance, 0.0, 1.5));
+        }
+        else if(i%2==0){
+        positionAllocUe->Add(Vector(3*interUeDistance+0.5*groupSpread, i * groupSpread, 1.5));
+        }
+        else {
+            positionAllocUe->Add(Vector(3*interUeDistance-0.5*groupSpread, -i * groupSpread, 1.5));
+        }
+        }
+        mobility.SetPositionAllocator(positionAllocUe);
+        mobility.Install(ueVoiceContainer);
+        std::cout<<sqrt(mobility.GetDistanceSquaredBetween(ueVoiceContainer.Get(0),ueVoiceContainer.Get(5)))<<std::endl;
+        std::cout<<sqrt(mobility.GetDistanceSquaredBetween(ueVoiceContainer.Get(0),ueVoiceContainer.Get(3)))<<std::endl;
+        /* The default topology is the following:
+    *          
+    *  UE_group1        UE_bridge        UE_group2
+    *      o                                 o
+    *        o             o                o
+    *      o                                 o
+    *            
+    *  (interUeDistance-0.5*groupSpread,  (2*interUeDistance,  (3*interUeDistance±0.5*groupSpread,
+    *   ±i*groupSpread, 1.5)               0.0, 1.5)            ±i*groupSpread, 1.5)
+    */
 
     /*
      * Setup the NR module. We create the various helpers needed for the
@@ -526,7 +538,8 @@ main(int argc, char* argv[])
      * We have configured the attributes we needed. Now, install and get the pointers
      * to the NetDevices, which contains all the NR stack:
      */
-    NetDeviceContainer ueVoiceNetDev = nrHelper->InstallUeDevice(ueVoiceContainer, allBwps);
+    NetDeviceContainer ueGroup1NetDev = nrHelper->InstallUeDevice(ueGroup1, allBwps);
+    NetDeviceContainer ueGroup2NetDev = nrHelper->InstallUeDevice(ueGroup2, allBwps);
 
     /*
      * Case (iii): Go node for node and change the attributes we have to setup
@@ -534,7 +547,12 @@ main(int argc, char* argv[])
      */
 
     // When all the configuration is done, explicitly call UpdateConfig ()
-    for (auto it = ueVoiceNetDev.Begin(); it != ueVoiceNetDev.End(); ++it)
+    for (auto it = ueGroup1NetDev.Begin(); it != ueGroup1NetDev.End(); ++it)
+    {
+        DynamicCast<NrUeNetDevice>(*it)->UpdateConfig();
+    }
+
+    for (auto it = ueGroup2NetDev.Begin(); it != ueGroup2NetDev.End(); ++it)
     {
         DynamicCast<NrUeNetDevice>(*it)->UpdateConfig();
     }
@@ -559,9 +577,9 @@ main(int argc, char* argv[])
      *                   ns3::NrEesmIrT2, ns3::NrLteMiErrorModel
      * AMC type: NrAmc::ShannonModel or NrAmc::ErrorModel
      */
-    std::string errorModel = "ns3::NrEesmIrT1";
-    nrSlHelper->SetSlErrorModel(errorModel);
-    nrSlHelper->SetUeSlAmcAttribute("AmcModel", EnumValue(NrAmc::ErrorModel));
+    //std::string errorModel = "ns3::NrEesmIrT1";
+   // nrSlHelper->SetSlErrorModel(errorModel);
+   // nrSlHelper->SetUeSlAmcAttribute("AmcModel", EnumValue(NrAmc::ErrorModel));
 
     /*
      * Set the SL scheduler attributes
@@ -577,7 +595,8 @@ main(int argc, char* argv[])
      * error model, configure AMC, and configure ChunkProcessor in Interference
      * API.
      */
-    nrSlHelper->PrepareUeForSidelink(ueVoiceNetDev, bwpIdContainer);
+    nrSlHelper->PrepareUeForSidelink(ueGroup1NetDev, bwpIdContainer);
+    nrSlHelper->PrepareUeForSidelink(ueGroup2NetDev, bwpIdContainer);
 
     /*
      * Start preparing for all the sub Structs/RRC Information Element (IEs)
@@ -685,7 +704,8 @@ main(int argc, char* argv[])
     slPreConfigNr.slPreconfigFreqInfoList[0] = slFreConfigCommonNr;
 
     // Communicate the above pre-configuration to the NrSlHelper
-    nrSlHelper->InstallNrSlPreConfiguration(ueVoiceNetDev, slPreConfigNr);
+    nrSlHelper->InstallNrSlPreConfiguration(ueGroup1NetDev, slPreConfigNr);
+    nrSlHelper->InstallNrSlPreConfiguration(ueGroup2NetDev, slPreConfigNr);
 
     /****************************** End SL Configuration ***********************/
 
@@ -693,8 +713,10 @@ main(int argc, char* argv[])
      * Fix the random streams
      */
     int64_t stream = 1;
-    stream += nrHelper->AssignStreams(ueVoiceNetDev, stream);
-    stream += nrSlHelper->AssignStreams(ueVoiceNetDev, stream);
+    stream += nrHelper->AssignStreams(ueGroup1NetDev, stream);
+    stream += nrSlHelper->AssignStreams(ueGroup1NetDev, stream);
+    stream += nrHelper->AssignStreams(ueGroup2NetDev, stream);
+    stream += nrSlHelper->AssignStreams(ueGroup2NetDev, stream);
 
     /*
      * Configure the IP stack, and activate NR Sidelink bearer (s) as per the
@@ -707,7 +729,8 @@ main(int argc, char* argv[])
     internet.Install(ueVoiceContainer);
     stream += internet.AssignStreams(ueVoiceContainer, stream);
     uint32_t dstL2Id = 255;
-    Ipv4Address groupAddress4("225.0.0.0"); // use multicast address as destination
+    Ipv4Address group1Address4("225.0.0.1"); // Group 1 multicast
+    Ipv4Address group2Address4("225.0.0.2"); //group 2 multicast
     Ipv6Address groupAddress6("ff0e::1");   // use multicast address as destination
     Address remoteAddress;
     Address localAddress;
@@ -720,10 +743,9 @@ main(int argc, char* argv[])
     slInfo.m_pdb = delayBudget;
     slInfo.m_harqEnabled = harqEnabled;
 
-    if (!useIPv6)
-    {
         Ipv4InterfaceContainer ueIpIface;
-        ueIpIface = epcHelper->AssignUeIpv4Address(ueVoiceNetDev);
+        ueIpIface = epcHelper->AssignUeIpv4Address(ueGroup1NetDev);
+        ueIpIface = epcHelper->AssignUeIpv4Address(ueGroup2NetDev);
 
         // set the default gateway for the UE
         Ipv4StaticRoutingHelper ipv4RoutingHelper;
@@ -735,34 +757,25 @@ main(int argc, char* argv[])
                 ipv4RoutingHelper.GetStaticRouting(ueNode->GetObject<Ipv4>());
             ueStaticRouting->SetDefaultRoute(epcHelper->GetUeDefaultGatewayAddress(), 1);
         }
-        remoteAddress = InetSocketAddress(groupAddress4, port);
+        remoteAddress = InetSocketAddress(group1Address4, port);
         localAddress = InetSocketAddress(Ipv4Address::GetAny(), port);
-        tft = Create<LteSlTft>(LteSlTft::Direction::BIDIRECTIONAL, groupAddress4, slInfo);
+        tft = Create<LteSlTft>(LteSlTft::Direction::BIDIRECTIONAL, group1Address4, slInfo);
         // Set Sidelink bearers
-        nrSlHelper->ActivateNrSlBearer(finalSlBearersActivationTime, ueVoiceNetDev, tft);
-    }
-    else
-    {
-        Ipv6InterfaceContainer ueIpIface;
-        ueIpIface = epcHelper->AssignUeIpv6Address(ueVoiceNetDev);
+        nrSlHelper->ActivateNrSlBearer(finalSlBearersActivationTime, ueGroup1NetDev, tft);
 
-        // set the default gateway for the UE
-        Ipv6StaticRoutingHelper ipv6RoutingHelper;
-        for (uint32_t u = 0; u < ueVoiceContainer.GetN(); ++u)
-        {
-            Ptr<Node> ueNode = ueVoiceContainer.Get(u);
-            // Set the default gateway for the UE
-            Ptr<Ipv6StaticRouting> ueStaticRouting =
-                ipv6RoutingHelper.GetStaticRouting(ueNode->GetObject<Ipv6>());
-            ueStaticRouting->SetDefaultRoute(epcHelper->GetUeDefaultGatewayAddress6(), 1);
-        }
-        remoteAddress = Inet6SocketAddress(groupAddress6, port);
-        localAddress = Inet6SocketAddress(Ipv6Address::GetAny(), port);
-        tft = Create<LteSlTft>(LteSlTft::Direction::BIDIRECTIONAL, groupAddress6, slInfo);
+        //group 2 tft
+        dstL2Id = 256;
+        slInfo.m_dstL2Id = dstL2Id;
+
+        remoteAddress = InetSocketAddress(group1Address4, port);
+        localAddress = InetSocketAddress(Ipv4Address::GetAny(), port);
+        tft = Create<LteSlTft>(LteSlTft::Direction::BIDIRECTIONAL, group2Address4, slInfo);
         // Set Sidelink bearers
-        nrSlHelper->ActivateNrSlBearer(finalSlBearersActivationTime, ueVoiceNetDev, tft);
-    }
+        nrSlHelper->ActivateNrSlBearer(finalSlBearersActivationTime, ueGroup2NetDev, tft);
 
+        
+    
+    
     /*
      * Configure the applications:
      * Client app: multicast-applicaiton with creatingPackets boolean set to true
@@ -782,14 +795,15 @@ main(int argc, char* argv[])
     Ipv4Address forwardAddress= ueVoiceContainer.Get(3)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
     Ipv4Address destinationAddress=ueVoiceContainer.Get(5)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
     std::cout<<"Forwarding Address: "<<forwardAddress<<" Destination "<<destinationAddress<<std::endl;
-    senderApp->Setup(appSocket,forwardAddress,port,destinationAddress,port,1024,1,DataRate(dataRateBeString),true);
+    senderApp->Setup(appSocket, group1Address4, forwardAddress, port, destinationAddress, port, 
+                 1024, 1, DataRate(dataRateBeString), true);
     ueVoiceContainer.Get(0)->AddApplication(senderApp);
     senderApp->SetStartTime(finalSlBearersActivationTime);
     senderApp->SetStopTime(finalSimTime);
 
     
-    //RECEIVER OF FIRST TWO HOP SENDS TO THE FIRST (NODE 5)
-    appSocket=Socket::CreateSocket(ueVoiceContainer.Get(6),UdpSocketFactory::GetTypeId());
+    //NODE 5 
+   /* appSocket=Socket::CreateSocket(ueVoiceContainer.Get(6),UdpSocketFactory::GetTypeId());
     senderApp = CreateObject<RoutingApp>();
      forwardAddress= ueVoiceContainer.Get(3)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
      destinationAddress=ueVoiceContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
@@ -798,7 +812,7 @@ main(int argc, char* argv[])
     ueVoiceContainer.Get(5)->AddApplication(senderApp);
     senderApp->SetStartTime(finalSlBearersActivationTime+Seconds(0.1));
     senderApp->SetStopTime(finalSimTime);
-    
+    */
     // Output app start, stop and duration
     double realAppStart =
         finalSlBearersActivationTime.GetSeconds() +
@@ -808,17 +822,28 @@ main(int argc, char* argv[])
     std::cout << "App start time " << realAppStart << " sec" << std::endl;
     std::cout << "App stop time " << appStopTime << " sec" << std::endl;
 
-
+ std::cout<<"node #"<<0<<" with address "<<ueVoiceContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()<<std::endl;
     //Creating custom two-hop socket and application for receiver/forwarder. Addresses are not used in nodes that dont generate traffic.
-    for(uint16_t i=1;i<ueVoiceContainer.GetN()-1;i++){
-    Ptr<Socket> appSocket=Socket::CreateSocket(ueVoiceContainer.Get(i),UdpSocketFactory::GetTypeId());
+    for(uint16_t i=1;i<ueGroup1.GetN();i++){
+    Ptr<Socket> appSocket=Socket::CreateSocket(ueGroup1.Get(i),UdpSocketFactory::GetTypeId());
     Ptr<RoutingApp> receiverApp = CreateObject<RoutingApp>();
-        std::cout<<"node #"<<i<<" with address "<<ueVoiceContainer.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()<<std::endl;
-    receiverApp->Setup(appSocket,false); //<-false because its not generating traffic
-    ueVoiceContainer.Get(i)->AddApplication(receiverApp);
-    receiverApp->SetStartTime(Seconds(1.0));
+        std::cout<<"node #"<<i<<" with address "<<ueGroup1.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()<<std::endl;
+    receiverApp->Setup(appSocket,group1Address4,false); //<-false because its not generating traffic
+    ueGroup1.Get(i)->AddApplication(receiverApp);
+    receiverApp->SetStartTime(Seconds(0.1));
     receiverApp->SetStopTime(finalSimTime);
     }
+
+    for(uint16_t i=0;i<ueGroup2.GetN();i++){
+    Ptr<Socket> appSocket=Socket::CreateSocket(ueGroup2.Get(i),UdpSocketFactory::GetTypeId());
+    Ptr<RoutingApp> receiverApp = CreateObject<RoutingApp>();
+        std::cout<<"node #"<<i<<" with address "<<ueGroup2.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()<<std::endl;
+    receiverApp->Setup(appSocket,group2Address4,false); //<-false because its not generating traffic
+    ueGroup2.Get(i)->AddApplication(receiverApp);
+    receiverApp->SetStartTime(Seconds(0.1));
+    receiverApp->SetStopTime(finalSimTime);
+    }
+
 
     /*
      * Hook the traces, to be used to compute average PIR and to data to be

@@ -42,6 +42,7 @@ class RoutingApp : public Application
      * \param creatingPackets True if this node should create and send packets
      */
     void Setup(Ptr<Socket> socket,
+               Ipv4Address multicastAddress,
                Ipv4Address forwardingAddress,
                uint16_t forwardingPort,           
                Ipv4Address finalAddress,
@@ -57,6 +58,7 @@ class RoutingApp : public Application
      * \param creatingPackets True if this node should create and send packets
      */
     void Setup(Ptr<Socket> socket,
+               Ipv4Address multicastAddress,
                bool creatingPackets
               );
 
@@ -68,16 +70,20 @@ class RoutingApp : public Application
     void ScheduleTwoHopTx();
 
     /// Send a two hop packet.
-    void SendTwoHopPacket();
+    void GenerateTwoHopPackets();
+
+    //
+    //void SendEchoTwoHopPacket(Ptr<Packet> packet);
     //
     void ForwardPacket(Ptr<Packet> packet);
     //Recieving a packet, used for forwarder
 
     void ReceivingTwoHopPacket(Ptr<Socket> socket);
     
-    void EchoPacket(Ptr<Socket> socket,Ptr<Packet> packet);
+    void EchoPacket(Ptr<Socket> socket,Ptr<Packet> originalPacket);
 
     Ptr<Socket> m_socket;   //!< The transmission socket.
+    InetSocketAddress m_multicastAddress;
     InetSocketAddress m_destinationPeer;         //!< The destination address.
     InetSocketAddress m_forwardingPeer;
     uint32_t m_packetSize;  //!< The packet size.
